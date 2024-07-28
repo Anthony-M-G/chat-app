@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>websocket-chat</title>
+  <script type="module">
+    import { io } from 'https://cdn.socket.io/4.3.2/socket.io.esm.min.js';
+    
+    const socket = io({
+      auth:{
+        serverOffset: 0
+      }
+    });
+    const form=document.querySelector('[data-form]');
+    const btn=document.querySelector('[data-btn]');
+    console.log(socket.auth.serverOffset)
+    form.addEventListener('submit',(e)=>{
+      e.preventDefault();
+      let inputValue= e.target[0].value
+      if (!inputValue) return;
+      socket.emit('chat message', {
+        value: inputValue
+      });
+      e.target[0].value= '';
+    }
+  );
+    
+    const messagesPanel=document.querySelector('[data-messages]')
+    const uList=document.createElement('ul')
+    messagesPanel.appendChild(uList)
+    socket.on('new-message',(arg)=>{
+      console.log(arg)
+      const {message_id, content, message_time}= arg
+     uList.innerHTML+=`<li><p>${content}</p><p class="p2" >${message_time}</p></li>`
+     socket.auth.serverOffset=message_id
+    }
+  )
+
+  socket.on('init', (arg) => {
+        const {message_id ,content, message_time } = arg
+        uList.innerHTML += `<li><p>${content}</p><p class="p2" >${message_time}</p></li>`
+  })
+  </script>
+  <style>
+   body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #141414;
+}
+
+.chat {
+  width: 90%; /* Usar porcentaje para hacer el contenedor adaptable */
+  max-width: 400px; /* Limitar el ancho máximo */
+  height: 90vh; /* Altura adaptativa */
+  max-height: 500px; /* Limitar la altura máxima */
+  background-color: #f4f7f6;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0.25, 0, 0, 0);
+  display: flex;
+  flex-direction: column;
+  border: 3px solid #181717;
+}
+h1{
+  color: #00796b;
+    display: block;
+    font-size: larger;
+    font-weight: bold;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    align-self: center;
+    height: min-content;
+    padding: 0;
+}
+
+.messages-container {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  color: #f5f5f5;
+}
+
+.form {
+  display: flex;
+  padding: 10px;
+  gap: 10px;
+}
+
+.form input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  outline: none;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #003028;
+}
+
+.form button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #037d44;
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+ul li:nth-child(even) {
+  background-color:  #004d40;
+  text-align: end;
+  color: #f1f1f1;
+   box-shadow: 2px 2px  rgba(0, 0, 0, 0.1);
+}
+
+ul li:nth-child(odd) {
+  background-color: #f1f1f1 ;
+  color: #00332b;
+  box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+li {
+  display: block;
+  border: 1px solid #f1f1f1;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  padding: 0 12px;
+  align-items: center;
+}
+
+li p {
+  margin: 0;
+  padding: 2px;
+  font-size: 12px;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  
+}
+
+li .p2 {
+  color: #00796b;
+  font-size: 8px;
+  margin-left: auto;
+
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 600px) {
+  .chat {
+    width: 100%; /* Usar todo el ancho disponible en pantallas pequeñas */
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .form input, .form button {
+    padding: 8px; /* Ajuste de padding para pantallas pequeñas */
+  }
+
+  li p {
+    font-size: 10px; /* Reducir tamaño de fuente para pantallas pequeñas */
+  }
+
+  li .p2 {
+    font-size: 7px;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <section class="chat">
+    <h1>Chat</h1>
+    <div class="messages-container" data-messages>
+      
+    </div>
+    <form class="form" data-form>
+      <input type="text" placeholder="Type a message..." data-input>
+      <button data-btn>Send</button>
+    </form>
+  </section>
+  
+</body>
+
+</html>
